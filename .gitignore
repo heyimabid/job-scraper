@@ -1,0 +1,17 @@
+.env
+__pycache__/
+*.pyc
+*.html
+*_files/
+bin/
+lib/
+libexec/
+include/
+share/
+msys/
+var/
+etc/
+blobs/
+models/
+dataset/
+output/

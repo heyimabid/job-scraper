@@ -1,0 +1,57 @@
+name: Scrape Jobs & Sync to Appwrite
+
+on:
+  schedule:
+    # Run every 12 hours (midnight and noon UTC)
+    - cron: "0 0,12 * * *"
+  workflow_dispatch: # Allow manual trigger from GitHub UI
+
+permissions:
+  contents: write # Needed to commit updated JSON files back to repo
+
+jobs:
+  scrape-and-sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Playwright browsers
+        run: playwright install chromium --with-deps
+
+      - name: Run BDJobs scraper
+        continue-on-error: true
+        run: python bdjobs.py
+
+      - name: Run Shomvob scraper
+        continue-on-error: true
+        run: python shomvob.py
+
+      - name: Sync to Appwrite
+        env:
+          APPWRITE_ENDPOINT: ${{ secrets.APPWRITE_ENDPOINT }}
+          APPWRITE_PROJECT_ID: ${{ secrets.APPWRITE_PROJECT_ID }}
+          APPWRITE_API_KEY: ${{ secrets.APPWRITE_API_KEY }}
+          APPWRITE_DATABASE_ID: ${{ secrets.APPWRITE_DATABASE_ID }}
+          APPWRITE_COLLECTION_ID: ${{ secrets.APPWRITE_COLLECTION_ID }}
+        run: python sync_to_appwrite.py
+
+      - name: Commit updated job data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add output.json added_jobs.json removed_jobs.json
+          git add shomvob_output.json shomvob_added_jobs.json shomvob_removed_jobs.json
+          git diff --cached --quiet || git commit -m "chore: update scraped job data [skip ci]"
+          git push
