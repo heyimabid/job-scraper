@@ -161,6 +161,14 @@ async def main():
         removed_urls = existing_urls - current_urls
         unchanged_count = len(existing_urls & current_urls)
 
+        # Safety check: if the scraper found drastically fewer jobs than
+        # before, it likely means the scrape partially failed (different
+        # environment, anti-bot, etc.). Don't mark the gap as "removed".
+        if existing_urls and len(current_urls) < len(existing_urls) * 0.5:
+            print(f"⚠️  Safety: found only {len(current_urls)} jobs vs {len(existing_urls)} previously.")
+            print("   Treating as partial scrape — skipping removals.")
+            removed_urls = set()
+
         print(f"   ✚ New jobs to scrape:  {len(new_urls)}")
         print(f"   ✖ Removed jobs:        {len(removed_urls)}")
         print(f"   ● Unchanged jobs:       {unchanged_count}\n")

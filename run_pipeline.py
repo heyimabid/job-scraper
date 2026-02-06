@@ -1,7 +1,7 @@
 """
 run_pipeline.py — Automated job scraping pipeline.
 
-Runs both scrapers (bdjobs + shomvob) then syncs results to Appwrite.
+Runs all scrapers (bdjobs + shomvob + linkedin) then syncs results to Appwrite.
 Repeats every 12 hours. Can also be run once with --once flag.
 """
 
@@ -42,6 +42,21 @@ def run_shomvob_scraper():
         return False
 
 
+def run_linkedin_scraper():
+    """Run the LinkedIn scraper."""
+    print(f"\n{'='*60}")
+    print(f"🔄 [{datetime.now():%Y-%m-%d %H:%M:%S}] Running LinkedIn scraper...")
+    print(f"{'='*60}")
+    try:
+        import linkedin
+        asyncio.run(linkedin.main())
+        print("✅ LinkedIn scraper completed.")
+        return True
+    except Exception as e:
+        print(f"❌ LinkedIn scraper failed: {e}")
+        return False
+
+
 def run_appwrite_sync():
     """Sync scraped data to Appwrite."""
     print(f"\n{'='*60}")
@@ -66,12 +81,13 @@ def run_pipeline():
     # Step 1: Run scrapers
     bdjobs_ok = run_bdjobs_scraper()
     shomvob_ok = run_shomvob_scraper()
+    linkedin_ok = run_linkedin_scraper()
 
-    # Step 2: Sync to Appwrite (even if one scraper failed)
-    if bdjobs_ok or shomvob_ok:
+    # Step 2: Sync to Appwrite (even if some scrapers failed)
+    if bdjobs_ok or shomvob_ok or linkedin_ok:
         run_appwrite_sync()
     else:
-        print("\n⚠️ Both scrapers failed, skipping Appwrite sync.")
+        print("\n⚠️ All scrapers failed, skipping Appwrite sync.")
 
     elapsed = (datetime.now() - start).total_seconds()
     print(f"\n{'#'*60}")

@@ -368,6 +368,13 @@ async def main():
 
         new_jobs = [j for j in current_jobs if j["url"] in new_urls]
 
+        # Safety check: if the API returned drastically fewer jobs than
+        # before, it may be an API issue. Don't mark the gap as "removed".
+        if existing_urls and len(current_urls) < len(existing_urls) * 0.5:
+            print(f"⚠️  Safety: found only {len(current_urls)} jobs vs {len(existing_urls)} previously.")
+            print("   Treating as partial fetch — skipping removals.")
+            removed_urls = set()
+
         print(f"   ✚ New jobs to enrich:  {len(new_jobs)}")
         print(f"   ✖ Removed jobs:        {len(removed_urls)}")
         print(f"   ● Unchanged jobs:       {unchanged_count}\n")

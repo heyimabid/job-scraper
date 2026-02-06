@@ -35,6 +35,9 @@ BDJOBS_ADDED = "added_jobs.json"
 BDJOBS_REMOVED = "removed_jobs.json"
 SHOMVOB_ADDED = "shomvob_added_jobs.json"
 SHOMVOB_REMOVED = "shomvob_removed_jobs.json"
+# LinkedIn handled manually, not in automated sync
+# LINKEDIN_ADDED = "linkedin_added_jobs.json"
+# LINKEDIN_REMOVED = "linkedin_removed_jobs.json"
 
 # Appwrite batch limit
 BATCH_SIZE = 100
@@ -76,6 +79,9 @@ def make_source_id(source, job):
     elif source == "bdjobs":
         jid = extract_bdjobs_id(job.get("url", ""))
         return f"bdjobs-{jid}" if jid else None
+    elif source == "linkedin":
+        jid = job.get("job_id", "")
+        return f"linkedin-{jid}" if jid else None
     return None
 
 
@@ -166,6 +172,44 @@ def map_bdjobs_job(job):
         "experience": truncate(job.get("experience", ""), 255),
         "education": truncate(job.get("education", ""), 255),
         "deadline": truncate(job.get("deadline", ""), 255),
+    }
+    return {k: v for k, v in doc.items() if v is not None}
+
+
+def map_linkedin_job(job):
+    """Map a LinkedIn scraper job dict to an Appwrite document dict (with $id)."""
+    source_id = make_source_id("linkedin", job)
+    if not source_id:
+        return None
+
+    title = truncate(job.get("job_title", ""), 255)
+    company = truncate(job.get("company_name", ""), 255)
+    location = truncate(job.get("location", ""), 255)
+    url = job.get("url", "")
+
+    if not title or not company or not location or not url:
+        return None
+
+    extra = {}
+    for key in ("employment_type", "date_posted", "experience"):
+        val = job.get(key)
+        if val:
+            extra[key] = val
+
+    doc = {
+        "$id": make_doc_id(source_id),
+        "title": title,
+        "company": company,
+        "location": location,
+        "apply_url": url,
+        "source_id": source_id,
+        "description": truncate(job.get("job_description", ""), 5000),
+        "slug": slugify(f"{title}-{company}"),
+        "salary": truncate(job.get("salary", ""), 255),
+        "experience": truncate(job.get("experience", ""), 255),
+        "education": truncate(job.get("education", ""), 255),
+        "deadline": truncate(job.get("deadline", ""), 255),
+        "enhanced_json": json.dumps(extra, ensure_ascii=False)[:50000] if extra else None,
     }
     return {k: v for k, v in doc.items() if v is not None}
 
