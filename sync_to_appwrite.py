@@ -37,6 +37,8 @@ SHOMVOB_ADDED = "shomvob_added_jobs.json"
 SHOMVOB_REMOVED = "shomvob_removed_jobs.json"
 LINKEDIN_ADDED = "linkedin_added_jobs.json"
 LINKEDIN_REMOVED = "linkedin_removed_jobs.json"
+CAREERJET_ADDED = "careerjet_added_jobs.json"
+CAREERJET_REMOVED = "careerjet_removed_jobs.json"
 
 # Appwrite batch limit
 BATCH_SIZE = 100
@@ -81,6 +83,9 @@ def make_source_id(source, job):
     elif source == "linkedin":
         jid = job.get("job_id", "")
         return f"linkedin-{jid}" if jid else None
+    elif source == "careerjet":
+        jid = job.get("job_id", "")
+        return f"{jid}" if jid else None
     return None
 
 
@@ -132,6 +137,7 @@ def map_shomvob_job(job):
         "location": location,
         "apply_url": url,
         "source_id": source_id,
+        "source": "shomvob",
         "description": truncate(job.get("job_description", ""), 5000),
         "slug": slugify(f"{title}-{company}"),
         "salary": truncate(job.get("salary", ""), 255),
@@ -165,6 +171,7 @@ def map_bdjobs_job(job):
         "location": location,
         "apply_url": url,
         "source_id": source_id,
+        "source": "bdjobs",
         "description": truncate(job.get("job_description", ""), 5000),
         "slug": slugify(f"{title}-{company}"),
         "salary": truncate(job.get("salary", ""), 255),
@@ -202,12 +209,51 @@ def map_linkedin_job(job):
         "location": location,
         "apply_url": url,
         "source_id": source_id,
+        "source": "linkedin",
         "description": truncate(job.get("job_description", ""), 5000),
         "slug": slugify(f"{title}-{company}"),
         "salary": truncate(job.get("salary", ""), 255),
         "experience": truncate(job.get("experience", ""), 255),
         "education": truncate(job.get("education", ""), 255),
         "deadline": truncate(job.get("deadline", ""), 255),
+        "enhanced_json": json.dumps(extra, ensure_ascii=False)[:50000] if extra else None,
+    }
+    return {k: v for k, v in doc.items() if v is not None}
+
+
+def map_careerjet_job(job):
+    """Map a CareerJet scraper job dict to an Appwrite document dict (with $id)."""
+    source_id = make_source_id("careerjet", job)
+    if not source_id:
+        return None
+
+    title = truncate(job.get("job_title", ""), 255)
+    company = truncate(job.get("company_name", ""), 255)
+    location = truncate(job.get("location", ""), 255)
+    url = job.get("url", "")
+
+    if not title or not company or not url:
+        return None
+
+    extra = {}
+    for key in ("date_posted", "site", "salary_min", "salary_max",
+                "salary_currency_code", "salary_type"):
+        val = job.get(key)
+        if val:
+            extra[key] = val
+
+    doc = {
+        "$id": make_doc_id(source_id),
+        "title": title,
+        "company": company,
+        "location": location or "Bangladesh",
+        "apply_url": url,
+        "source_id": source_id,
+        "source": "careerjet",
+        "source_site": truncate(job.get("site", ""), 255),
+        "description": truncate(job.get("job_description", ""), 5000),
+        "slug": slugify(f"{title}-{company}"),
+        "salary": truncate(job.get("salary", ""), 255),
         "enhanced_json": json.dumps(extra, ensure_ascii=False)[:50000] if extra else None,
     }
     return {k: v for k, v in doc.items() if v is not None}
@@ -332,29 +378,48 @@ def push_removed_jobs(databases, source, filepath):
     return deleted
 
 
-def sync():
-    """Main sync: push added jobs and remove deleted jobs from Appwrite."""
+def sync(sources=None):
+    """
+    Main sync: push added jobs and remove deleted jobs from Appwrite.
+    If sources is provided, only sync those sources (e.g. ["careerjet"]).
+    """
     print("=" * 50)
     print("Syncing jobs to Appwrite...")
+    if sources:
+        print(f"  (filtered to: {', '.join(sources)})")
     print("=" * 50)
 
     client = get_appwrite_client()
     databases = Databases(client)
 
+    all_sources = {
+        "bdjobs":    (BDJOBS_ADDED,    BDJOBS_REMOVED,    map_bdjobs_job),
+        "shomvob":   (SHOMVOB_ADDED,   SHOMVOB_REMOVED,   map_shomvob_job),
+        "linkedin":  (LINKEDIN_ADDED,  LINKEDIN_REMOVED,  map_linkedin_job),
+        "careerjet": (CAREERJET_ADDED, CAREERJET_REMOVED, map_careerjet_job),
+    }
+
+    active = {k: v for k, v in all_sources.items() if not sources or k in sources}
+
     # ── Push new jobs ──
     print("\n📤 Pushing new jobs...")
-    push_added_jobs(databases, "bdjobs", BDJOBS_ADDED, map_bdjobs_job)
-    push_added_jobs(databases, "shomvob", SHOMVOB_ADDED, map_shomvob_job)
-    push_added_jobs(databases, "linkedin", LINKEDIN_ADDED, map_linkedin_job)
+    for name, (added_file, _, mapper) in active.items():
+        push_added_jobs(databases, name, added_file, mapper)
 
     # ── Remove deleted jobs ──
     print("\n🗑 Removing deleted jobs...")
-    push_removed_jobs(databases, "bdjobs", BDJOBS_REMOVED)
-    push_removed_jobs(databases, "shomvob", SHOMVOB_REMOVED)
-    push_removed_jobs(databases, "linkedin", LINKEDIN_REMOVED)
+    for name, (_, removed_file, _) in active.items():
+        push_removed_jobs(databases, name, removed_file)
 
     print("\n✅ Appwrite sync complete!")
 
 
 if __name__ == "__main__":
-    sync()
+    import sys
+    # Support: python sync_to_appwrite.py --source careerjet
+    sources_filter = None
+    if "--source" in sys.argv:
+        idx = sys.argv.index("--source")
+        if idx + 1 < len(sys.argv):
+            sources_filter = [s.strip() for s in sys.argv[idx + 1].split(",")]
+    sync(sources=sources_filter)

@@ -1,18 +1,18 @@
-name: Scrape Jobs & Sync to Appwrite
+name: CareerJet Scrape & Sync to Appwrite
 
 on:
   schedule:
-    # Run every 12 hours (midnight and noon UTC)
-    - cron: "0 0,12 * * *"
+    # Run every 6 hours (00:00, 06:00, 12:00, 18:00 UTC)
+    - cron: "0 */6 * * *"
   workflow_dispatch: # Allow manual trigger from GitHub UI
 
 permissions:
   contents: write # Needed to commit updated JSON files back to repo
 
 jobs:
-  scrape-and-sync:
+  careerjet-scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
@@ -27,47 +27,25 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Install Playwright browsers
-        run: playwright install chromium --with-deps
-
-      - name: Run BDJobs scraper
-        continue-on-error: true
-        run: python bdjobs.py
-
-      - name: Run Shomvob scraper
-        continue-on-error: true
-        run: python shomvob.py
-
-      - name: Run LinkedIn scraper
-        continue-on-error: true
-        env:
-          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-        run: python linkedin.py
-
       - name: Run CareerJet scraper
-        continue-on-error: true
         env:
           CAREERJET_API_KEY: ${{ secrets.CAREERJET_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: python careerjet.py
 
-      - name: Sync to Appwrite
+      - name: Sync CareerJet jobs to Appwrite
         env:
           APPWRITE_ENDPOINT: ${{ secrets.APPWRITE_ENDPOINT }}
           APPWRITE_PROJECT_ID: ${{ secrets.APPWRITE_PROJECT_ID }}
           APPWRITE_API_KEY: ${{ secrets.APPWRITE_API_KEY }}
           APPWRITE_DATABASE_ID: ${{ secrets.APPWRITE_DATABASE_ID }}
           APPWRITE_COLLECTION_ID: ${{ secrets.APPWRITE_COLLECTION_ID }}
-        run: python sync_to_appwrite.py
+        run: python sync_to_appwrite.py --source careerjet
 
-      - name: Commit updated job data
+      - name: Commit updated CareerJet data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add output.json added_jobs.json removed_jobs.json
-          git add shomvob_output.json shomvob_added_jobs.json shomvob_removed_jobs.json
-          git add linkedin_output.json linkedin_added_jobs.json linkedin_removed_jobs.json linkedin_state.json
           git add careerjet_output.json careerjet_added_jobs.json careerjet_removed_jobs.json careerjet_state.json
-          git diff --cached --quiet || git commit -m "chore: update scraped job data [skip ci]"
+          git diff --cached --quiet || git commit -m "chore: update CareerJet job data [skip ci]"
           git push
