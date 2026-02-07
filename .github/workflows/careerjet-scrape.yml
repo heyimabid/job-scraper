@@ -27,6 +27,12 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Log runner public IP
+        run: |
+          IP=$(curl -s https://api.ipify.org)
+          echo "Runner public IP: $IP"
+          echo "If CareerJet returns 403, add this IP at https://www.careerjet.net/partners/api/"
+
       - name: Run CareerJet scraper
         env:
           CAREERJET_API_KEY: ${{ secrets.CAREERJET_API_KEY }}

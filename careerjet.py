@@ -315,13 +315,16 @@ def make_job_id(job):
     return hashlib.md5(raw.encode()).hexdigest()[:16]
 
 
-def get_auth_header():
+def get_auth_header(keyword="", location=""):
     """Build the Basic Auth + Referer headers for the API."""
     credentials = f"{CAREERJET_API_KEY}:"
     encoded = base64.b64encode(credentials.encode()).decode()
+    # Referer must be the page that triggered the API call (per API docs)
+    from urllib.parse import quote_plus
+    referer = f"https://hiredup.me/find-jobs/?s={quote_plus(keyword)}&l={quote_plus(location)}"
     return {
         "Authorization": f"Basic {encoded}",
-        "Referer": "https://hiredup.me",
+        "Referer": referer,
     }
 
 
@@ -346,7 +349,7 @@ async def search_jobs(session, keyword, location="", page=1):
         async with session.get(
             API_ENDPOINT,
             params=params,
-            headers=get_auth_header(),
+            headers=get_auth_header(keyword, location),
             timeout=aiohttp.ClientTimeout(total=30),
         ) as resp:
             if resp.status != 200:
