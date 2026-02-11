@@ -493,132 +493,132 @@ def is_job_unavailable(content, soup=None):
 # Strategy 1: Direct LinkedIn Search Page Scraping
 # ══════════════════════════════════════════════════════════════════
 
-# async def scrape_linkedin_search_direct(browser, keyword, location, max_jobs=50, max_pages=5):
-#     """
-#     Directly scrape LinkedIn's public job search results page.
-#     This is the most reliable method as it doesn't require any API.
-#     """
-#     jobs = []
-#     seen_ids = set()
+async def scrape_linkedin_search_direct(browser, keyword, location, max_jobs=50, max_pages=5):
+    """
+    Directly scrape LinkedIn's public job search results page.
+    This is the most reliable method as it doesn't require any API.
+    """
+    jobs = []
+    seen_ids = set()
     
-#     try:
-#         page = await browser.new_page()
+    try:
+        page = await browser.new_page()
         
-#         # Random user agent
-#         await page.set_extra_http_headers({
-#             "User-Agent": random.choice(USER_AGENTS),
-#             "Accept-Language": "en-US,en;q=0.9",
-#             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-#         })
+        # Random user agent
+        await page.set_extra_http_headers({
+            "User-Agent": random.choice(USER_AGENTS),
+            "Accept-Language": "en-US,en;q=0.9",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        })
         
-#         geo_id = LOCATION_GEO_IDS.get(location)
+        geo_id = LOCATION_GEO_IDS.get(location)
 
-#         print(f"  🔍 Searching: {keyword} in {location}")
+        print(f"  🔍 Searching: {keyword} in {location}")
 
-#         base_url = "https://www.linkedin.com/jobs/search"
-#         params = {
-#             'keywords': keyword,
-#             'location': location,
-#             'position': '1',
-#             'pageNum': '0',
-#         }
-#         if geo_id:
-#             params['geoId'] = geo_id
+        base_url = "https://www.linkedin.com/jobs/search"
+        params = {
+            'keywords': keyword,
+            'location': location,
+            'position': '1',
+            'pageNum': '0',
+        }
+        if geo_id:
+            params['geoId'] = geo_id
 
-#         url = f"{base_url}?{urlencode(params)}"
-#         print(f"     URL: {url}")
+        url = f"{base_url}?{urlencode(params)}"
+        print(f"     URL: {url}")
 
-#         max_retries = 3
-#         for attempt in range(max_retries):
-#             try:
-#                 await page.goto(url, timeout=60000, wait_until="domcontentloaded")
-#                 break
-#             except Exception as e:
-#                 if attempt == max_retries - 1:
-#                     raise e
-#                 print(f"     ⚠️ Retry {attempt + 1}/{max_retries}...")
-#                 await asyncio.sleep(2)
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                await page.goto(url, timeout=60000, wait_until="domcontentloaded")
+                break
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    raise e
+                print(f"     ⚠️ Retry {attempt + 1}/{max_retries}...")
+                await asyncio.sleep(2)
 
-#         await asyncio.sleep(3)
+        await asyncio.sleep(3)
 
-#         idle_scrolls = 0
-#         last_count = 0
-#         while len(jobs) < max_jobs and idle_scrolls < 3:
-#             job_cards = await page.query_selector_all(
-#                 'div.base-card, div.job-search-card, li.jobs-search-results__list-item, div[data-job-id]'
-#             )
+        idle_scrolls = 0
+        last_count = 0
+        while len(jobs) < max_jobs and idle_scrolls < 3:
+            job_cards = await page.query_selector_all(
+                'div.base-card, div.job-search-card, li.jobs-search-results__list-item, div[data-job-id]'
+            )
 
-#             for card in job_cards:
-#                 try:
-#                     link_elem = await card.query_selector('a.base-card__full-link, a[href*="/jobs/view/"]')
-#                     if not link_elem:
-#                         continue
+            for card in job_cards:
+                try:
+                    link_elem = await card.query_selector('a.base-card__full-link, a[href*="/jobs/view/"]')
+                    if not link_elem:
+                        continue
 
-#                     job_url = await link_elem.get_attribute('href')
-#                     if not job_url:
-#                         continue
+                    job_url = await link_elem.get_attribute('href')
+                    if not job_url:
+                        continue
 
-#                     job_id = extract_job_id(job_url)
-#                     if not job_id or job_id in seen_ids:
-#                         continue
+                    job_id = extract_job_id(job_url)
+                    if not job_id or job_id in seen_ids:
+                        continue
 
-#                     title_elem = await card.query_selector('h3.base-search-card__title, h3, span.job-card-list__title')
-#                     title = await title_elem.inner_text() if title_elem else ""
-#                     title = clean_text(title)
+                    title_elem = await card.query_selector('h3.base-search-card__title, h3, span.job-card-list__title')
+                    title = await title_elem.inner_text() if title_elem else ""
+                    title = clean_text(title)
 
-#                     company_elem = await card.query_selector(
-#                         'h4.base-search-card__subtitle, a.hidden-nested-link, span.job-card-container__company-name'
-#                     )
-#                     company = await company_elem.inner_text() if company_elem else ""
-#                     company = clean_text(company)
+                    company_elem = await card.query_selector(
+                        'h4.base-search-card__subtitle, a.hidden-nested-link, span.job-card-container__company-name'
+                    )
+                    company = await company_elem.inner_text() if company_elem else ""
+                    company = clean_text(company)
 
-#                     location_elem = await card.query_selector(
-#                         'span.job-search-card__location, span.job-card-container__metadata-item'
-#                     )
-#                     job_location = await location_elem.inner_text() if location_elem else location
-#                     job_location = clean_text(job_location)
+                    location_elem = await card.query_selector(
+                        'span.job-search-card__location, span.job-card-container__metadata-item'
+                    )
+                    job_location = await location_elem.inner_text() if location_elem else location
+                    job_location = clean_text(job_location)
 
-#                     if title:
-#                         seen_ids.add(job_id)
-#                         jobs.append({
-#                             'job_id': job_id,
-#                             'url': clean_url(job_url),
-#                             'title': title,
-#                             'company': company or 'Unknown Company',
-#                             'location': job_location,
-#                             'source': 'linkedin_search',
-#                         })
+                    if title:
+                        seen_ids.add(job_id)
+                        jobs.append({
+                            'job_id': job_id,
+                            'url': clean_url(job_url),
+                            'title': title,
+                            'company': company or 'Unknown Company',
+                            'location': job_location,
+                            'source': 'linkedin_search',
+                        })
 
-#                         if len(jobs) >= max_jobs:
-#                             break
+                        if len(jobs) >= max_jobs:
+                            break
 
-#                 except Exception as e:
-#                     print(f"     ⚠️ Error extracting card: {e}")
-#                     continue
+                except Exception as e:
+                    print(f"     ⚠️ Error extracting card: {e}")
+                    continue
 
-#             if len(jobs) >= max_jobs:
-#                 break
+            if len(jobs) >= max_jobs:
+                break
 
-#             if len(jobs) == last_count:
-#                 idle_scrolls += 1
-#             else:
-#                 idle_scrolls = 0
-#                 last_count = len(jobs)
+            if len(jobs) == last_count:
+                idle_scrolls += 1
+            else:
+                idle_scrolls = 0
+                last_count = len(jobs)
 
-#             content = await page.content()
-#             if "you've viewed all jobs for this search" in content.lower():
-#                 break
+            content = await page.content()
+            if "you've viewed all jobs for this search" in content.lower():
+                break
 
-#             await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-#             await page.wait_for_timeout(2000)
+            await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+            await page.wait_for_timeout(2000)
 
-#         await page.close()
-#         print(f"     ✅ Extracted {len(jobs)} jobs from search")
+        await page.close()
+        print(f"     ✅ Extracted {len(jobs)} jobs from search")
         
-#     except Exception as e:
-#         print(f"     ❌ Search failed: {e}")
+    except Exception as e:
+        print(f"     ❌ Search failed: {e}")
     
-#     return jobs
+    return jobs
 
 
 # ══════════════════════════════════════════════════════════════════
