@@ -419,10 +419,6 @@ def clean_text(text):
     return re.sub(r'\s+', ' ', text).strip()
 
 
-# ══════════════════════════════════════════════════════════════════
-# IMPROVED: Enhanced Unavailable Job Detection
-# ══════════════════════════════════════════════════════════════════
-
 def is_job_unavailable(content, soup=None):
     """
     Return True if LinkedIn indicates the job is unavailable.
@@ -450,22 +446,56 @@ def is_job_unavailable(content, soup=None):
         "position has been filled",
         "this job posting is no longer active",
         "application deadline has passed",
+        "this job is not available",
+        "job posting removed",
+        "job has been filled",
+        "job posting is no longer available",
+        "job posting has been removed",
+        "job has been closed",
+        "closed job",
+        "expired job",
+        "job expired",
+        "not accepting applications",
+        "applications are no longer being accepted",
     )
     
+    # Quick text check first
     if any(marker in text for marker in text_markers):
         return True
     
-    # Method 2: HTML structure-based detection (more reliable)
+    # Method 2: Check for specific error patterns in HTML
+    if "closedjob" in text or "job-closed" in text or "job_expired" in text:
+        return True
+    
+    # Method 3: HTML structure-based detection (most reliable)
     if soup:
-        # Check for error SVG with LinkedIn's specific ID
+        # SPECIFIC: Check for the exact LinkedIn error structure you provided
+        # This looks for the exact div structure with the error message
+        error_containers = soup.find_all('div', class_=lambda c: c and 'df5c2e2d' in str(c) and 'dc9ad2f4' in str(c))
+        for container in error_containers:
+            # Check for the specific error SVG
+            error_svg = container.find('svg', {'id': 'signal-error-small'})
+            if error_svg:
+                # Check for the error text in the same container
+                error_text = container.get_text(' ', strip=True).lower()
+                if any(marker in error_text for marker in text_markers):
+                    return True
+        
+        # Check for error SVG with id="signal-error-small" (direct match)
         error_svg = soup.find('svg', {'id': 'signal-error-small'})
         if error_svg:
-            # Look for accompanying error message in parent elements
+            # Look for accompanying error message in nearby elements
             parent = error_svg.find_parent()
             if parent:
+                # Check parent and siblings for error text
                 error_text = parent.get_text(' ', strip=True).lower()
                 if any(marker in error_text for marker in text_markers):
                     return True
+            
+            # Also check the aria-label of the SVG
+            svg_label = error_svg.get('aria-label', '').lower()
+            if 'error' in svg_label:
+                return True
         
         # Check for aria-live="assertive" divs (LinkedIn uses these for error notifications)
         error_divs = soup.find_all('div', {'aria-live': 'assertive'})
@@ -479,12 +509,43 @@ def is_job_unavailable(content, soup=None):
         if error_messages:
             return True
         
-        # Check for specific LinkedIn error classes
-        error_containers = soup.find_all('div', class_=lambda c: c and any(x in str(c).lower() for x in ['error', 'unavailable', 'closed']))
-        for container in error_containers:
-            container_text = container.get_text(' ', strip=True).lower()
-            if any(marker in container_text for marker in text_markers):
-                return True
+        # Check for specific LinkedIn error classes from your example
+        specific_classes = [
+            '_3cbae366',  # Outer container class from your example
+            'df5c2e2d',   # Container class
+            'dc9ad2f4',   # Inner container class
+            '_386ab418',   # Common error container class
+            'e9ed141d',    # Another error container class
+        ]
+        
+        for class_name in specific_classes:
+            error_elements = soup.find_all('div', class_=class_name)
+            for element in error_elements:
+                element_text = element.get_text(' ', strip=True).lower()
+                if any(marker in element_text for marker in text_markers):
+                    return True
+        
+        # Check for "Apply" button - if it's missing or disabled, job might be closed
+        apply_buttons = soup.find_all('button', string=lambda s: s and 'apply' in s.lower())
+        if apply_buttons:
+            for button in apply_buttons:
+                button_text = button.get_text(' ', strip=True).lower()
+                if 'no longer accepting' in button_text or 'closed' in button_text:
+                    return True
+                # Check for disabled state
+                if button.get('aria-disabled') == 'true' or button.get('disabled'):
+                    # Check if this is the main apply button
+                    if 'apply' in button_text:
+                        return True
+        
+        # Additional check: Look for any element with the exact error text
+        exact_error_elements = soup.find_all(string=lambda text: text and "No longer accepting applications" in text)
+        if exact_error_elements:
+            return True
+    
+    # Method 4: Check URL patterns for expired jobs
+    if 'expired' in text or 'closed' in text or 'unavailable' in text:
+        return True
     
     return False
 
@@ -944,6 +1005,12 @@ async def worker(browser, queue, results, existing_map):
             if data and data.get('unavailable'):
                 unavailable_count += 1
                 print(f"  🗑️ [{job_info['job_id']}] Unavailable - SKIPPED")
+                # Log the reason if available
+                content = await page.content()
+                soup = BeautifulSoup(content, 'html.parser')
+                error_text = soup.get_text(' ', strip=True)
+                if "No longer accepting applications" in error_text:
+                    print(f"     Reason: 'No longer accepting applications' detected")
             elif data and data.get('job_title'):
                 results.append(data)
                 print(f"  ✅ [{len(results)}] {data['job_title'][:50]} — {data['company_name']}")
