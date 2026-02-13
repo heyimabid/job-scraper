@@ -830,205 +830,184 @@ async def discover_jobs_via_google(keyword, location):
 # ══════════════════════════════════════════════════════════════════
 # IMPROVED: Job Detail Extraction with Enhanced Unavailability Check
 # ══════════════════════════════════════════════════════════════════
-
 async def extract_job_detail(page, job_info):
     """
-    Extract detailed information from a LinkedIn job posting page.
-    IMPROVED: Better detection of unavailable jobs using multiple methods.
+    Production-hardened LinkedIn job extractor.
+    - Properly waits for dynamic rendering
+    - Uses live DOM badge detection (most reliable)
+    - Falls back to structured + text detection
+    - Filters unavailable jobs BEFORE extraction
     """
+
     url = job_info['url']
-    
+
     try:
-        # Navigate to job page
-        await page.goto(url, timeout=60000, wait_until="domcontentloaded")
-        await asyncio.sleep(2)
-        
-        # Get page content
+        # ─────────────────────────────────────────────
+        # 1️⃣ Proper navigation (wait for full hydration)
+        # ─────────────────────────────────────────────
+        await page.goto(url, timeout=60000, wait_until="networkidle")
+
+        try:
+            await page.wait_for_selector(
+                'h1.top-card-layout__title, div[aria-live="assertive"], svg#signal-error-small',
+                timeout=8000
+            )
+        except:
+            pass
+
+        # Small hydration buffer (not blind sleep)
+        await page.wait_for_timeout(800)
+
+        # ─────────────────────────────────────────────
+        # 2️⃣ LIVE DOM BADGE CHECK (MOST RELIABLE)
+        # ─────────────────────────────────────────────
+        badge = await page.query_selector(
+            'span:has-text("No longer accepting applications")'
+        )
+        if badge:
+            return {
+                'url': url,
+                'job_id': job_info['job_id'],
+                'source': 'linkedin',
+                'unavailable': True,
+                'extraction_method': 'badge-detected',
+            }
+
+        # Check for other strong unavailable markers
+        strong_error = await page.query_selector(
+            'div[aria-live="assertive"], svg#signal-error-small'
+        )
+        if strong_error:
+            text = (await strong_error.inner_text()).lower()
+            if any(x in text for x in [
+                "no longer available",
+                "job posting has expired",
+                "position has been filled",
+                "no longer accepting applications"
+            ]):
+                return {
+                    'url': url,
+                    'job_id': job_info['job_id'],
+                    'source': 'linkedin',
+                    'unavailable': True,
+                    'extraction_method': 'error-container',
+                }
+
+        # ─────────────────────────────────────────────
+        # 3️⃣ Get fully rendered content
+        # ─────────────────────────────────────────────
         content = await page.content()
         soup = BeautifulSoup(content, 'html.parser')
-        
-        # CRITICAL: Check if job is unavailable FIRST with enhanced detection
+
+        # Secondary fallback detection (HTML-level)
         if is_job_unavailable(content, soup):
             return {
                 'url': url,
                 'job_id': job_info['job_id'],
                 'source': 'linkedin',
                 'unavailable': True,
-                'extraction_method': 'unavailable',
+                'extraction_method': 'html-detected',
             }
 
-        # Try JSON-LD first (most reliable)
+        # ─────────────────────────────────────────────
+        # 4️⃣ Try JSON-LD (Most Accurate Data Source)
+        # ─────────────────────────────────────────────
+        json_ld_objects = []
+
         for script in soup.find_all('script', type='application/ld+json'):
             try:
-                ld = json.loads(script.string)
-                
-                # Handle array of ld+json objects
-                if isinstance(ld, list):
-                    for item in ld:
-                        if isinstance(item, dict) and item.get('@type') == 'JobPosting':
-                            ld = item
-                            break
-                
-                if isinstance(ld, dict) and ld.get('@type') == 'JobPosting':
-                    # Extract company
-                    org = ld.get('hiringOrganization', {})
-                    if isinstance(org, list):
-                        org = org[0] if org else {}
-                    company = org.get('name', '') if isinstance(org, dict) else str(org)
-                    
-                    # Extract location
-                    loc = ld.get('jobLocation', {})
-                    if isinstance(loc, list):
-                        loc = loc[0] if loc else {}
-                    
-                    addr = loc.get('address', {}) if isinstance(loc, dict) else {}
-                    if isinstance(addr, list):
-                        addr = addr[0] if addr else {}
-                    
-                    location = ''
-                    if isinstance(addr, dict):
-                        parts = [
-                            addr.get('addressLocality', ''),
-                            addr.get('addressRegion', ''),
-                            addr.get('addressCountry', '')
-                        ]
-                        location = ', '.join(p for p in parts if p)
-                    
-                    # Extract description
-                    desc = ld.get('description', '')
-                    if isinstance(desc, list):
-                        desc = ' '.join(str(d) for d in desc)
-                    
-                    desc_soup = BeautifulSoup(str(desc), 'html.parser')
-                    description = desc_soup.get_text(' ', strip=True)
-                    
-                    # Extract employment type
-                    employment_type = ld.get('employmentType', '')
-                    
-                    # Extract date posted
-                    date_posted = ld.get('datePosted', '')
-                    
-                    return {
-                        'url': url,
-                        'job_id': job_info['job_id'],
-                        'source': 'linkedin',
-                        'company_name': company,
-                        'job_title': ld.get('title', job_info.get('title', '')),
-                        'location': location or job_info.get('location', ''),
-                        'employment_type': employment_type,
-                        'date_posted': date_posted,
-                        'job_description': description[:5000],
-                        'extraction_method': 'json-ld',
-                    }
-            
-            except (json.JSONDecodeError, TypeError, AttributeError):
+                data = json.loads(script.string)
+                if isinstance(data, list):
+                    json_ld_objects.extend(data)
+                else:
+                    json_ld_objects.append(data)
+            except:
                 continue
-        
-        # Fallback: HTML scraping
-        title = ''
-        title_elem = soup.select_one('h1.top-card-layout__title, h2.top-card-layout__title')
-        if title_elem:
-            title = clean_text(title_elem.get_text())
-        
-        company = ''
-        company_elem = soup.select_one('a.topcard__org-name-link, span.topcard__flavor')
-        if company_elem:
-            company = clean_text(company_elem.get_text())
-        
-        location = ''
+
+        for obj in json_ld_objects:
+            if isinstance(obj, dict) and obj.get('@type') == 'JobPosting':
+
+                org = obj.get('hiringOrganization', {})
+                if isinstance(org, list):
+                    org = org[0] if org else {}
+                company = org.get('name', '') if isinstance(org, dict) else ''
+
+                loc = obj.get('jobLocation', {})
+                if isinstance(loc, list):
+                    loc = loc[0] if loc else {}
+
+                addr = loc.get('address', {}) if isinstance(loc, dict) else {}
+                location = ''
+                if isinstance(addr, dict):
+                    parts = [
+                        addr.get('addressLocality', ''),
+                        addr.get('addressRegion', ''),
+                        addr.get('addressCountry', '')
+                    ]
+                    location = ', '.join(p for p in parts if p)
+
+                description_html = obj.get('description', '')
+                desc_soup = BeautifulSoup(str(description_html), 'html.parser')
+                description = desc_soup.get_text(" ", strip=True)
+
+                return {
+                    'url': url,
+                    'job_id': job_info['job_id'],
+                    'source': 'linkedin',
+                    'company_name': company,
+                    'job_title': obj.get('title', job_info.get('title', '')),
+                    'location': location or job_info.get('location', ''),
+                    'employment_type': obj.get('employmentType', ''),
+                    'date_posted': obj.get('datePosted', ''),
+                    'job_description': description[:5000],
+                    'extraction_method': 'json-ld',
+                }
+
+        # ─────────────────────────────────────────────
+        # 5️⃣ Fallback HTML scraping
+        # ─────────────────────────────────────────────
+        title_elem = soup.select_one('h1.top-card-layout__title')
+        company_elem = soup.select_one('a.topcard__org-name-link')
         location_elem = soup.select_one('span.topcard__flavor--bullet')
-        if location_elem:
-            location = clean_text(location_elem.get_text())
-        
-        description = ''
-        desc_elem = soup.select_one('div.show-more-less-html__markup, div.description__text')
-        if desc_elem:
-            description = clean_text(desc_elem.get_text())
-        
+        desc_elem = soup.select_one('div.show-more-less-html__markup')
+
+        title = clean_text(title_elem.get_text()) if title_elem else job_info.get('title', '')
+        company = clean_text(company_elem.get_text()) if company_elem else job_info.get('company', 'Unknown Company')
+        location = clean_text(location_elem.get_text()) if location_elem else job_info.get('location', '')
+        description = clean_text(desc_elem.get_text()) if desc_elem else ''
+
+        if not title:
+            # No title = likely broken or expired
+            return {
+                'url': url,
+                'job_id': job_info['job_id'],
+                'source': 'linkedin',
+                'unavailable': True,
+                'extraction_method': 'missing-title',
+            }
+
         return {
             'url': url,
             'job_id': job_info['job_id'],
             'source': 'linkedin',
-            'company_name': company or job_info.get('company', 'Unknown Company'),
-            'job_title': title or job_info.get('title', ''),
-            'location': location or job_info.get('location', ''),
-            'employment_type': 'Full-time',
-            'date_posted': '',
-            'job_description': description[:5000],
-            'extraction_method': 'html-scraping',
-        }
-        
-    except Exception as e:
-        print(f"  ⚠️ Failed to extract {url}: {e}")
-        # Return basic info at minimum
-        return {
-            'url': url,
-            'job_id': job_info['job_id'],
-            'source': 'linkedin',
-            'company_name': job_info.get('company', 'Unknown Company'),
-            'job_title': job_info.get('title', ''),
-            'location': job_info.get('location', ''),
+            'company_name': company,
+            'job_title': title,
+            'location': location,
             'employment_type': '',
             'date_posted': '',
-            'job_description': '',
-            'extraction_method': 'failed',
+            'job_description': description[:5000],
+            'extraction_method': 'html-fallback',
         }
 
-
-async def worker(browser, queue, results, existing_map):
-    """
-    Worker that processes job detail extraction.
-    IMPROVED: Filters out unavailable jobs completely.
-    """
-    page = await browser.new_page()
-    
-    # Randomize user agent
-    await page.set_extra_http_headers({
-        'User-Agent': random.choice(USER_AGENTS),
-        'Accept-Language': 'en-US,en;q=0.9',
-    })
-    
-    unavailable_count = 0
-    
-    while not queue.empty():
-        job_info = await queue.get()
-        
-        try:
-            # Check if already exists
-            if job_info['job_id'] in existing_map:
-                queue.task_done()
-                continue
-            
-            data = await extract_job_detail(page, job_info)
-            
-            # CRITICAL: Skip unavailable jobs - don't add them to results
-            if data and data.get('unavailable'):
-                unavailable_count += 1
-                print(f"  🗑️ [{job_info['job_id']}] Unavailable - SKIPPED")
-                # Log the reason if available
-                content = await page.content()
-                soup = BeautifulSoup(content, 'html.parser')
-                error_text = soup.get_text(' ', strip=True)
-                if "No longer accepting applications" in error_text:
-                    print(f"     Reason: 'No longer accepting applications' detected")
-            elif data and data.get('job_title'):
-                results.append(data)
-                print(f"  ✅ [{len(results)}] {data['job_title'][:50]} — {data['company_name']}")
-            else:
-                print(f"  ⚠️  [{job_info['job_id']}] Could not extract details")
-        
-        except Exception as e:
-            print(f"  ❌ [{job_info['job_id']}] Error: {e}")
-        
-        queue.task_done()
-        
-        # Small delay between requests
-        await asyncio.sleep(random.uniform(1, 2))
-    
-    if unavailable_count > 0:
-        print(f"  📊 Worker filtered out {unavailable_count} unavailable jobs")
-    
-    await page.close()
+    except Exception as e:
+        print(f"  ⚠️ Failed to extract {url}: {e}")
+        return {
+            'url': url,
+            'job_id': job_info['job_id'],
+            'source': 'linkedin',
+            'unavailable': True,
+            'extraction_method': 'exception',
+        }
 
 
 async def check_job_availability(page, job_info):
