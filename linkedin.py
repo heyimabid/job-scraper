@@ -1014,6 +1014,36 @@ async def availability_worker(browser, queue, unavailable_ids):
 # ══════════════════════════════════════════════════════════════════
 # Main Execution
 # ══════════════════════════════════════════════════════════════════
+async def extraction_worker(browser, queue, results, existing_map):
+    """
+    Worker that extracts job details from the queue.
+    Filters out unavailable jobs automatically.
+    """
+    page = await browser.new_page()
+    await page.set_extra_http_headers({
+        'User-Agent': random.choice(USER_AGENTS),
+        'Accept-Language': 'en-US,en;q=0.9',
+    })
+
+    while not queue.empty():
+        job_info = await queue.get()
+        try:
+            job_details = await extract_job_detail(page, job_info)
+            
+            # Only add if not marked as unavailable
+            if not job_details.get('unavailable', False):
+                results.append(job_details)
+                print(f"  ✅ [{job_details.get('job_id')}] {job_details.get('job_title', 'N/A')}")
+            else:
+                print(f"  🗑️ [{job_details.get('job_id')}] Filtered (unavailable)")
+                
+        except Exception as e:
+            print(f"  ❌ [{job_info.get('job_id')}] Extraction error: {e}")
+        
+        queue.task_done()
+        await asyncio.sleep(random.uniform(1, 2))
+
+    await page.close()
 
 async def main():
     print("=" * 60)
@@ -1224,7 +1254,7 @@ async def main():
 
             num_workers = min(CONCURRENCY, len(new_jobs))
             tasks = [
-                asyncio.create_task(worker(browser, queue, new_results, existing_map))
+                asyncio.create_task(extraction_worker(browser, queue, new_results, existing_map))
                 for _ in range(num_workers)
             ]
 
