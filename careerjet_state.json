@@ -1,6 +1,6 @@
 {
-  "run_count": 28,
-  "last_run": "2026-02-16T04:48:49.798638",
+  "run_count": 29,
+  "last_run": "2026-02-16T15:39:12.473075",
   "ai_keywords_cache": [],
   "used_ai_keywords": [
     "Banking Analyst",
@@ -47,29 +47,26 @@
     "Cox's Bazar"
   ],
   "last_keywords": [
-    "Cost Accountant",
-    "Management Accountant",
-    "Payroll",
-    "Treasury",
-    "CFO",
-    "Chartered Accountant",
-    "ACCA",
-    "CPA",
-    "Budget Analyst",
-    "Compliance Officer",
-    "Accounting",
-    "Finance",
-    "Credit Controller"
+    "Accountant",
+    "Senior Accountant",
+    "Junior Accountant",
+    "Finance Officer",
+    "Finance Manager",
+    "Financial Analyst",
+    "Audit",
+    "Internal Auditor",
+    "Tax Accountant",
+    "Accounts Payable",
+    "Accounts Receivable",
+    "Bookkeeper"
   ],
   "last_locations": [
     "Bangladesh",
-    "Barisal",
-    "Mymensingh",
-    "Dhaka"
+    "Dhaka",
+    "Chittagong",
+    "Sylhet"
   ],
-  "last_ai_keywords": [
-    "Credit Controller"
-  ],
+  "last_ai_keywords": [],
   "last_ai_locations": [],
   "jobs_found_this_run": 0
 }
