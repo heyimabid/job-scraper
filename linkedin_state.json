@@ -1,6 +1,6 @@
 {
-  "run_count": 17,
-  "last_run": "2026-02-17T04:52:59.196154",
+  "run_count": 18,
+  "last_run": "2026-02-17T15:40:57.970621",
   "ai_keywords_cache": [],
   "used_ai_keywords": [
     "MIS Coordinator",
@@ -72,31 +72,25 @@
     "Kuwait City, Kuwait"
   ],
   "last_keywords": [
-    "Finance Officer",
-    "Finance Manager",
-    "Financial Analyst",
-    "Finance Executive",
-    "Budget Analyst",
-    "Internal Auditor",
-    "External Auditor",
-    "Audit Associate",
-    "Audit Manager",
-    "Compliance Officer",
-    "Banking Officer"
+    "Payroll Officer",
+    "Payroll Accountant",
+    "Accounts Payable",
+    "Accounts Receivable",
+    "AR AP Officer",
+    "Treasury Officer",
+    "Treasury Analyst",
+    "Investment Analyst",
+    "Portfolio Manager",
+    "Chief Financial Officer"
   ],
   "last_locations": [
     "Bangladesh",
-    "Dhanmondi, Dhaka",
-    "Uttara, Dhaka",
-    "Gazipur, Bangladesh",
-    "Bahrain"
+    "Narayanganj, Bangladesh",
+    "Comilla, Bangladesh",
+    "Chattogram, Bangladesh"
   ],
-  "last_ai_keywords": [
-    "Banking Officer"
-  ],
-  "last_ai_locations": [
-    "Bahrain"
-  ],
-  "jobs_found_this_run": 106,
-  "unavailable_filtered": 64
+  "last_ai_keywords": [],
+  "last_ai_locations": [],
+  "jobs_found_this_run": 56,
+  "unavailable_filtered": 47
 }

@@ -1,6 +1,6 @@
 {
-  "run_count": 30,
-  "last_run": "2026-02-17T04:53:02.119929",
+  "run_count": 31,
+  "last_run": "2026-02-17T15:41:00.943457",
   "ai_keywords_cache": [],
   "used_ai_keywords": [
     "Invoicing Supervisor",
@@ -51,35 +51,26 @@
     "Cox's Bazar"
   ],
   "last_keywords": [
-    "Cost Accountant",
-    "Management Accountant",
-    "Payroll",
-    "Treasury",
-    "CFO",
-    "Chartered Accountant",
-    "ACCA",
-    "CPA",
-    "Budget Analyst",
-    "Compliance Officer",
-    "Accounting",
-    "Finance",
-    "Financial Planning",
-    "Treasury Manager",
-    "VAT Consultant",
-    "Business Analyst"
+    "Accountant",
+    "Senior Accountant",
+    "Junior Accountant",
+    "Finance Officer",
+    "Finance Manager",
+    "Financial Analyst",
+    "Audit",
+    "Internal Auditor",
+    "Tax Accountant",
+    "Accounts Payable",
+    "Accounts Receivable",
+    "Bookkeeper"
   ],
   "last_locations": [
     "Bangladesh",
-    "Rajshahi",
-    "Khulna",
-    "Gazipur"
+    "Narayanganj",
+    "Comilla",
+    "Rangpur"
   ],
-  "last_ai_keywords": [
-    "Financial Planning",
-    "Treasury Manager",
-    "VAT Consultant",
-    "Business Analyst"
-  ],
+  "last_ai_keywords": [],
   "last_ai_locations": [],
   "jobs_found_this_run": 0
 }
