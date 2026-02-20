@@ -1,6 +1,6 @@
 {
-  "run_count": 36,
-  "last_run": "2026-02-20T05:05:28.718908",
+  "run_count": 37,
+  "last_run": "2026-02-20T15:44:05.696095",
   "ai_keywords_cache": [],
   "used_ai_keywords": [
     "Billing Coordinator",
@@ -52,29 +52,26 @@
     "Cox's Bazar"
   ],
   "last_keywords": [
-    "Cost Accountant",
-    "Management Accountant",
-    "Payroll",
-    "Treasury",
-    "CFO",
-    "Chartered Accountant",
-    "ACCA",
-    "CPA",
-    "Budget Analyst",
-    "Compliance Officer",
-    "Accounting",
-    "Finance",
-    "Financial Planning Manager"
+    "Accountant",
+    "Senior Accountant",
+    "Junior Accountant",
+    "Finance Officer",
+    "Finance Manager",
+    "Financial Analyst",
+    "Audit",
+    "Internal Auditor",
+    "Tax Accountant",
+    "Accounts Payable",
+    "Accounts Receivable",
+    "Bookkeeper"
   ],
   "last_locations": [
     "Bangladesh",
-    "Barisal",
-    "Mymensingh",
-    "Dhaka"
+    "Dhaka",
+    "Chittagong",
+    "Sylhet"
   ],
-  "last_ai_keywords": [
-    "Financial Planning Manager"
-  ],
+  "last_ai_keywords": [],
   "last_ai_locations": [],
   "jobs_found_this_run": 0
 }
