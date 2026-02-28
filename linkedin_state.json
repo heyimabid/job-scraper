@@ -1,6 +1,6 @@
 {
-  "run_count": 38,
-  "last_run": "2026-02-27T15:32:17.304467",
+  "run_count": 39,
+  "last_run": "2026-02-28T04:03:34.800591",
   "ai_keywords_cache": [],
   "used_ai_keywords": [
     "Financial Regulatory",
@@ -94,28 +94,25 @@
     "Ho Chi Minh City, Vietnam"
   ],
   "last_keywords": [
-    "Payroll Officer",
-    "Payroll Accountant",
-    "Accounts Payable",
-    "Accounts Receivable",
-    "AR AP Officer",
-    "Treasury Officer",
-    "Treasury Analyst",
-    "Investment Analyst",
-    "Portfolio Manager",
-    "Chief Financial Officer"
+    "CFO",
+    "Finance Director",
+    "Accounting Manager",
+    "Finance Controller",
+    "Bookkeeper",
+    "Accounts Assistant",
+    "Accounting Clerk",
+    "Tax Consultant",
+    "Tax Manager",
+    "VAT Consultant"
   ],
   "last_locations": [
     "Bangladesh",
-    "Rajshahi, Bangladesh",
-    "Khulna, Bangladesh",
-    "Barisal, Bangladesh",
-    "Kigali, Rwanda"
+    "Rangpur, Bangladesh",
+    "Mymensingh, Bangladesh",
+    "Dhaka"
   ],
   "last_ai_keywords": [],
-  "last_ai_locations": [
-    "Kigali, Rwanda"
-  ],
-  "jobs_found_this_run": 49,
-  "unavailable_filtered": 45
+  "last_ai_locations": [],
+  "jobs_found_this_run": 23,
+  "unavailable_filtered": 49
 }
