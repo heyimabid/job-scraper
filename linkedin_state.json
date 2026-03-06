@@ -1,6 +1,6 @@
 {
-  "run_count": 50,
-  "last_run": "2026-03-05T15:43:11.441996",
+  "run_count": 51,
+  "last_run": "2026-03-06T04:27:11.285802",
   "ai_keywords_cache": [],
   "used_ai_keywords": [
     "ERP Consultant",
@@ -103,28 +103,25 @@
     "Dublin, Ireland"
   ],
   "last_keywords": [
-    "Tax Specialist",
-    "CPA",
-    "ACCA",
-    "CA",
-    "CMA",
-    "Chartered Accountant",
     "Accountant",
     "Senior Accountant",
     "Junior Accountant",
-    "Staff Accountant"
+    "Staff Accountant",
+    "Account Executive",
+    "Cost Accountant",
+    "Tax Accountant",
+    "Management Accountant",
+    "Financial Accountant",
+    "Audit Accountant"
   ],
   "last_locations": [
     "Bangladesh",
-    "Rajshahi, Bangladesh",
-    "Khulna, Bangladesh",
-    "Barisal, Bangladesh",
-    "Porto, Portugal"
+    "Rangpur, Bangladesh",
+    "Mymensingh, Bangladesh",
+    "Dhaka"
   ],
   "last_ai_keywords": [],
-  "last_ai_locations": [
-    "Porto, Portugal"
-  ],
-  "jobs_found_this_run": 175,
-  "unavailable_filtered": 71
+  "last_ai_locations": [],
+  "jobs_found_this_run": 66,
+  "unavailable_filtered": 10
 }
