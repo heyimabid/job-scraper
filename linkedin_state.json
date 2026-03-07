@@ -1,6 +1,6 @@
 {
-  "run_count": 52,
-  "last_run": "2026-03-06T16:27:54.950919",
+  "run_count": 53,
+  "last_run": "2026-03-07T04:14:51.853744",
   "ai_keywords_cache": [],
   "used_ai_keywords": [
     "ERP Consultant",
@@ -105,30 +105,25 @@
     "Doha, Qatar"
   ],
   "last_keywords": [
-    "Finance Officer",
-    "Finance Manager",
-    "Financial Analyst",
-    "Finance Executive",
-    "Budget Analyst",
-    "Internal Auditor",
-    "External Auditor",
-    "Audit Associate",
-    "Audit Manager",
-    "Compliance Officer"
+    "Payroll Officer",
+    "Payroll Accountant",
+    "Accounts Payable",
+    "Accounts Receivable",
+    "AR AP Officer",
+    "Treasury Officer",
+    "Treasury Analyst",
+    "Investment Analyst",
+    "Portfolio Manager",
+    "Chief Financial Officer"
   ],
   "last_locations": [
     "Bangladesh",
-    "Gulshan, Dhaka",
-    "Banani, Dhaka",
-    "Motijheel, Dhaka",
-    "Hyderabad, India",
-    "Shanghai, China"
+    "Dhanmondi, Dhaka",
+    "Uttara, Dhaka",
+    "Gazipur, Bangladesh"
   ],
   "last_ai_keywords": [],
-  "last_ai_locations": [
-    "Hyderabad, India",
-    "Shanghai, China"
-  ],
-  "jobs_found_this_run": 689,
-  "unavailable_filtered": 146
+  "last_ai_locations": [],
+  "jobs_found_this_run": 23,
+  "unavailable_filtered": 56
 }
