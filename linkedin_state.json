@@ -1,6 +1,6 @@
 {
-  "run_count": 59,
-  "last_run": "2026-03-10T04:49:06.892553",
+  "run_count": 60,
+  "last_run": "2026-03-10T15:41:23.501329",
   "ai_keywords_cache": [],
   "used_ai_keywords": [
     "Insurance Underwriter",
@@ -109,25 +109,25 @@
     "Doha, Qatar"
   ],
   "last_keywords": [
-    "CFO",
-    "Finance Director",
-    "Accounting Manager",
-    "Finance Controller",
-    "Bookkeeper",
-    "Accounts Assistant",
-    "Accounting Clerk",
-    "Tax Consultant",
-    "Tax Manager",
-    "VAT Consultant"
+    "Tax Specialist",
+    "CPA",
+    "ACCA",
+    "CA",
+    "CMA",
+    "Chartered Accountant",
+    "Accountant",
+    "Senior Accountant",
+    "Junior Accountant",
+    "Staff Accountant"
   ],
   "last_locations": [
     "Bangladesh",
-    "Dhanmondi, Dhaka",
-    "Uttara, Dhaka",
-    "Gazipur, Bangladesh"
+    "Narayanganj, Bangladesh",
+    "Comilla, Bangladesh",
+    "Chattogram, Bangladesh"
   ],
   "last_ai_keywords": [],
   "last_ai_locations": [],
-  "jobs_found_this_run": 36,
-  "unavailable_filtered": 48
+  "jobs_found_this_run": 35,
+  "unavailable_filtered": 58
 }
