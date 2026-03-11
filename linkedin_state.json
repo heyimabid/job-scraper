@@ -1,6 +1,6 @@
 {
-  "run_count": 61,
-  "last_run": "2026-03-11T04:28:13.780455",
+  "run_count": 62,
+  "last_run": "2026-03-11T15:19:08.188727",
   "ai_keywords_cache": [],
   "used_ai_keywords": [
     "Insurance Underwriter",
@@ -109,25 +109,25 @@
     "Doha, Qatar"
   ],
   "last_keywords": [
-    "Accountant",
-    "Senior Accountant",
-    "Junior Accountant",
-    "Staff Accountant",
-    "Account Executive",
-    "Cost Accountant",
-    "Tax Accountant",
-    "Management Accountant",
-    "Financial Accountant",
-    "Audit Accountant"
+    "Finance Officer",
+    "Finance Manager",
+    "Financial Analyst",
+    "Finance Executive",
+    "Budget Analyst",
+    "Internal Auditor",
+    "External Auditor",
+    "Audit Associate",
+    "Audit Manager",
+    "Compliance Officer"
   ],
   "last_locations": [
     "Bangladesh",
-    "Dhaka, Bangladesh",
-    "Chittagong, Bangladesh",
-    "Sylhet, Bangladesh"
+    "Rajshahi, Bangladesh",
+    "Khulna, Bangladesh",
+    "Barisal, Bangladesh"
   ],
   "last_ai_keywords": [],
   "last_ai_locations": [],
-  "jobs_found_this_run": 124,
-  "unavailable_filtered": 57
+  "jobs_found_this_run": 66,
+  "unavailable_filtered": 67
 }
