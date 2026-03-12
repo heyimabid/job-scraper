@@ -1,6 +1,6 @@
 {
-  "run_count": 62,
-  "last_run": "2026-03-11T15:19:08.188727",
+  "run_count": 63,
+  "last_run": "2026-03-12T04:12:11.032694",
   "ai_keywords_cache": [],
   "used_ai_keywords": [
     "Insurance Underwriter",
@@ -109,25 +109,25 @@
     "Doha, Qatar"
   ],
   "last_keywords": [
-    "Finance Officer",
-    "Finance Manager",
-    "Financial Analyst",
-    "Finance Executive",
-    "Budget Analyst",
-    "Internal Auditor",
-    "External Auditor",
-    "Audit Associate",
-    "Audit Manager",
-    "Compliance Officer"
+    "Payroll Officer",
+    "Payroll Accountant",
+    "Accounts Payable",
+    "Accounts Receivable",
+    "AR AP Officer",
+    "Treasury Officer",
+    "Treasury Analyst",
+    "Investment Analyst",
+    "Portfolio Manager",
+    "Chief Financial Officer"
   ],
   "last_locations": [
     "Bangladesh",
-    "Rajshahi, Bangladesh",
-    "Khulna, Bangladesh",
-    "Barisal, Bangladesh"
+    "Rangpur, Bangladesh",
+    "Mymensingh, Bangladesh",
+    "Dhaka"
   ],
   "last_ai_keywords": [],
   "last_ai_locations": [],
-  "jobs_found_this_run": 66,
-  "unavailable_filtered": 67
+  "jobs_found_this_run": 61,
+  "unavailable_filtered": 19
 }
