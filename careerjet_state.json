@@ -1,6 +1,6 @@
 {
-  "run_count": 80,
-  "last_run": "2026-03-14T04:46:17.502596",
+  "run_count": 81,
+  "last_run": "2026-03-14T15:42:37.629294",
   "ai_keywords_cache": [],
   "used_ai_keywords": [
     "Banking Professional",
@@ -61,29 +61,26 @@
     "Kuala Lumpur"
   ],
   "last_keywords": [
-    "Cost Accountant",
-    "Management Accountant",
-    "Payroll",
-    "Treasury",
-    "CFO",
-    "Chartered Accountant",
-    "ACCA",
-    "CPA",
-    "Budget Analyst",
-    "Compliance Officer",
-    "Accounting",
-    "Finance",
-    "Fiscal Manager"
+    "Accountant",
+    "Senior Accountant",
+    "Junior Accountant",
+    "Finance Officer",
+    "Finance Manager",
+    "Financial Analyst",
+    "Audit",
+    "Internal Auditor",
+    "Tax Accountant",
+    "Accounts Payable",
+    "Accounts Receivable",
+    "Bookkeeper"
   ],
   "last_locations": [
     "Bangladesh",
-    "Barisal",
-    "Mymensingh",
-    "Dhaka"
+    "Dhaka",
+    "Chittagong",
+    "Sylhet"
   ],
-  "last_ai_keywords": [
-    "Fiscal Manager"
-  ],
+  "last_ai_keywords": [],
   "last_ai_locations": [],
   "jobs_found_this_run": 0
 }
