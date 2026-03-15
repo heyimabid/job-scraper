@@ -1,6 +1,6 @@
 {
-  "run_count": 68,
-  "last_run": "2026-03-14T15:42:35.445636",
+  "run_count": 69,
+  "last_run": "2026-03-15T05:42:00.465532",
   "ai_keywords_cache": [],
   "used_ai_keywords": [
     "Credit Risk",
@@ -110,28 +110,25 @@
     "Doha, Qatar"
   ],
   "last_keywords": [
-    "Payroll Officer",
-    "Payroll Accountant",
-    "Accounts Payable",
-    "Accounts Receivable",
-    "AR AP Officer",
-    "Treasury Officer",
-    "Treasury Analyst",
-    "Investment Analyst",
-    "Portfolio Manager",
-    "Chief Financial Officer",
-    "Insurance Broker"
+    "CFO",
+    "Finance Director",
+    "Accounting Manager",
+    "Finance Controller",
+    "Bookkeeper",
+    "Accounts Assistant",
+    "Accounting Clerk",
+    "Tax Consultant",
+    "Tax Manager",
+    "VAT Consultant"
   ],
   "last_locations": [
     "Bangladesh",
-    "Rajshahi, Bangladesh",
-    "Khulna, Bangladesh",
-    "Barisal, Bangladesh"
+    "Rangpur, Bangladesh",
+    "Mymensingh, Bangladesh",
+    "Dhaka"
   ],
-  "last_ai_keywords": [
-    "Insurance Broker"
-  ],
+  "last_ai_keywords": [],
   "last_ai_locations": [],
-  "jobs_found_this_run": 31,
-  "unavailable_filtered": 56
+  "jobs_found_this_run": 24,
+  "unavailable_filtered": 50
 }
